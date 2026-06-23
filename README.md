@@ -48,3 +48,7 @@ lib/
 ## Raspberry Pi JARVIS roadmap
 
 The mobile app is prepared as a client for a larger JARVIS ecosystem. For Raspberry Pi 4, build a local assistant service that handles wake-word detection (`Jarvis`), microphone input, speech-to-text, Gemini/OpenAI reasoning, text-to-speech, Home Assistant control, media playback, and app/script launching. The Flutter app can later pair with that service over HTTPS/WebSocket/MQTT.
+
+## Gemini AI support
+
+Chat uses a Clean Architecture AI abstraction under `lib/features/ai`. The app reads the Gemini API key from secure storage, sends prompts with the `google_generative_ai` package, maps invalid-key/network/timeout/unknown failures to user-facing errors, and persists conversation history in the Hive `conversations` box.
