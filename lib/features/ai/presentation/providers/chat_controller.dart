@@ -41,18 +41,12 @@ class ChatController extends StateNotifier<ChatState> {
   final AiRepository _aiRepository;
   final Box<dynamic> _box;
 
-  Future<void> reloadHistory() async {
-    state = state.copyWith(messages: _readMessages(_box), clearError: true);
-  }
-
-  Future<String?> sendMessage(String content) async {
+  Future<void> sendMessage(String content) async {
     final trimmed = content.trim();
-    if (trimmed.isEmpty || state.isLoading) return null;
+    if (trimmed.isEmpty || state.isLoading) return;
 
     final userMessage = _message(ChatRole.user, trimmed);
-    final assistantMessage = _message(ChatRole.assistant, '');
-    final pendingMessages = [...state.messages, userMessage, assistantMessage];
-
+    final pendingMessages = [...state.messages, userMessage];
     state = state.copyWith(
       messages: pendingMessages,
       isLoading: true,
@@ -60,56 +54,19 @@ class ChatController extends StateNotifier<ChatState> {
     );
     await _saveMessages(pendingMessages);
 
-    final buffer = StringBuffer();
     try {
-      await for (final chunk in _aiRepository.streamMessage(trimmed)) {
-        buffer.write(chunk);
-        final streamedMessage = assistantMessage.copyWith(
-          content: buffer.toString(),
-        );
-        final updatedMessages = _replaceLastAssistantMessage(
-          pendingMessages,
-          streamedMessage,
-        );
-        state = state.copyWith(messages: updatedMessages);
-        await _saveMessages(updatedMessages);
-      }
-
-      final finalText = buffer.toString().trim();
-      if (finalText.isEmpty) {
-        throw const AiException(
-          AiErrorType.gemini,
-          'Gemini returned an empty response.',
-        );
-      }
-
-      final completedMessages = _replaceLastAssistantMessage(
-        state.messages,
-        assistantMessage.copyWith(content: finalText),
-      );
-      state = state.copyWith(messages: completedMessages, isLoading: false);
-      await _saveMessages(completedMessages);
-      return finalText;
+      final response = await _aiRepository.sendMessage(trimmed);
+      final assistantMessage = _message(ChatRole.assistant, response);
+      final updatedMessages = [...pendingMessages, assistantMessage];
+      state = state.copyWith(messages: updatedMessages, isLoading: false);
+      await _saveMessages(updatedMessages);
     } on AiException catch (error) {
-      final rolledBackMessages = [...state.messages]
-        ..removeWhere((message) => message.id == assistantMessage.id);
-      state = state.copyWith(
-        messages: rolledBackMessages,
-        isLoading: false,
-        errorMessage: error.message,
-      );
-      await _saveMessages(rolledBackMessages);
-      return null;
+      state = state.copyWith(isLoading: false, errorMessage: error.message);
     } catch (_) {
-      final rolledBackMessages = [...state.messages]
-        ..removeWhere((message) => message.id == assistantMessage.id);
       state = state.copyWith(
-        messages: rolledBackMessages,
         isLoading: false,
         errorMessage: 'An unknown error occurred. Please try again.',
       );
-      await _saveMessages(rolledBackMessages);
-      return null;
     }
   }
 
@@ -124,28 +81,14 @@ class ChatController extends StateNotifier<ChatState> {
     return raw
         .whereType<Map<dynamic, dynamic>>()
         .map(ChatMessage.fromJson)
-        .where((message) => message.content.trim().isNotEmpty)
         .toList(growable: false);
   }
 
   Future<void> _saveMessages(List<ChatMessage> messages) {
     return _box.put(
       _messagesKey,
-      messages
-          .where((message) => message.content.trim().isNotEmpty)
-          .map((message) => message.toJson())
-          .toList(growable: false),
+      messages.map((message) => message.toJson()).toList(growable: false),
     );
-  }
-
-  List<ChatMessage> _replaceLastAssistantMessage(
-    List<ChatMessage> messages,
-    ChatMessage streamedMessage,
-  ) {
-    return [
-      for (final message in messages)
-        if (message.id == streamedMessage.id) streamedMessage else message,
-    ];
   }
 
   static ChatMessage _message(ChatRole role, String content) {

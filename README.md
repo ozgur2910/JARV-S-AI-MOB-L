@@ -52,7 +52,3 @@ The mobile app is prepared as a client for a larger JARVIS ecosystem. For Raspbe
 ## Gemini AI support
 
 Chat uses a Clean Architecture AI abstraction under `lib/features/ai`. The app reads the Gemini API key from secure storage, sends prompts with the `google_generative_ai` package, maps invalid-key/network/timeout/unknown failures to user-facing errors, and persists conversation history in the Hive `conversations` box.
-
-## Voice engine
-
-The voice layer lives under `lib/features/voice` and follows the app architecture: `VoiceController → ChatController → AI Repository → Gemini → TTS`. It requests microphone permission, listens with speech-to-text, waits briefly after silence, sends the transcript into chat, speaks the AI response, and can automatically return to listening mode. Voice settings include language, speech rate, pitch, and auto-listen.

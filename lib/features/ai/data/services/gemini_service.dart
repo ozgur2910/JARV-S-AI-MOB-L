@@ -9,8 +9,6 @@ import '../../domain/models/ai_exception.dart';
 // ignore: camel_case_types
 abstract class AIService {
   Future<String> sendMessage(String message);
-
-  Stream<String> streamMessage(String message);
 }
 
 class GeminiService implements AIService {
@@ -23,36 +21,27 @@ class GeminiService implements AIService {
 
   @override
   Future<String> sendMessage(String message) async {
-    final chunks = <String>[];
-    await for (final chunk in streamMessage(message)) {
-      chunks.add(chunk);
-    }
-    final response = chunks.join().trim();
-    if (response.isEmpty) {
+    final apiKey = await _secureStorageService.readGeminiApiKey();
+    if (apiKey == null || apiKey.trim().isEmpty) {
       throw const AiException(
-        AiErrorType.gemini,
-        'Gemini returned an empty response.',
+        AiErrorType.invalidApiKey,
+        'Gemini API key is missing. Add a valid key in Settings.',
       );
     }
-    return response;
-  }
-
-  @override
-  Stream<String> streamMessage(String message) async* {
-    final apiKey = await _readAndValidateApiKey();
 
     try {
-      final model = GenerativeModel(model: _modelName, apiKey: apiKey);
-      final stream = model
-          .generateContentStream([Content.text(message.trim())])
+      final model = GenerativeModel(model: _modelName, apiKey: apiKey.trim());
+      final response = await model
+          .generateContent([Content.text(message)])
           .timeout(_timeout);
-
-      await for (final response in stream) {
-        final text = response.text;
-        if (text != null && text.isNotEmpty) {
-          yield text;
-        }
+      final text = response.text?.trim();
+      if (text == null || text.isEmpty) {
+        throw const AiException(
+          AiErrorType.unknown,
+          'Gemini returned an empty response.',
+        );
       }
+      return text;
     } on AiException {
       rethrow;
     } on TimeoutException {
@@ -71,50 +60,21 @@ class GeminiService implements AIService {
         'The Gemini API key is invalid or unauthorized.',
       );
     } on GenerativeAIException catch (error) {
-      throw _mapGeminiException(error);
+      final lowerMessage = error.message.toLowerCase();
+      if (lowerMessage.contains('api key') ||
+          lowerMessage.contains('permission') ||
+          lowerMessage.contains('unauthenticated')) {
+        throw const AiException(
+          AiErrorType.invalidApiKey,
+          'The Gemini API key is invalid or unauthorized.',
+        );
+      }
+      throw AiException(AiErrorType.unknown, error.message);
     } catch (_) {
       throw const AiException(
-        AiErrorType.gemini,
-        'Gemini could not complete the request.',
+        AiErrorType.unknown,
+        'Something went wrong while contacting Gemini.',
       );
     }
-  }
-
-  Future<String> _readAndValidateApiKey() async {
-    final apiKey = await _secureStorageService.readGeminiApiKey();
-    final trimmed = apiKey?.trim();
-    if (trimmed == null || trimmed.isEmpty) {
-      throw const AiException(
-        AiErrorType.invalidApiKey,
-        'Gemini API key is missing. Add a valid key in Settings.',
-      );
-    }
-    if (!_looksLikeGeminiApiKey(trimmed)) {
-      throw const AiException(
-        AiErrorType.invalidApiKey,
-        'The Gemini API key format is invalid.',
-      );
-    }
-    return trimmed;
-  }
-
-  bool _looksLikeGeminiApiKey(String apiKey) {
-    return apiKey.length >= 20 && !apiKey.contains(RegExp(r'\s'));
-  }
-
-  AiException _mapGeminiException(GenerativeAIException error) {
-    final lowerMessage = error.message.toLowerCase();
-    if (lowerMessage.contains('api key') ||
-        lowerMessage.contains('permission') ||
-        lowerMessage.contains('unauthenticated')) {
-      return const AiException(
-        AiErrorType.invalidApiKey,
-        'The Gemini API key is invalid or unauthorized.',
-      );
-    }
-    return AiException(
-      AiErrorType.gemini,
-      error.message.isEmpty ? 'Gemini returned an error.' : error.message,
-    );
   }
 }

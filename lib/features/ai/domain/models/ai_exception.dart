@@ -1,4 +1,4 @@
-enum AiErrorType { invalidApiKey, noInternet, timeout, gemini, unknown }
+enum AiErrorType { invalidApiKey, noInternet, timeout, unknown }
 
 class AiException implements Exception {
   const AiException(this.type, this.message);

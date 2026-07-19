@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color background = Color(0xFF05070A);
-  static const Color surface = Color(0xFF07131C);
-  static const Color neonBlue = Color(0xFF00D4FF);
-  static const Color deepBlue = Color(0xFF0866FF);
-  static const Color glass = Color(0x14FFFFFF);
+  static const Color background = Color(0xFF050816);
+  static const Color surface = Color(0xFF0B1024);
+  static const Color neonBlue = Color(0xFF00D9FF);
+  static const Color deepBlue = Color(0xFF145CFF);
 
   static ThemeData get dark {
     final textTheme = GoogleFonts.interTextTheme(ThemeData.dark().textTheme);
@@ -18,39 +17,22 @@ class AppTheme {
         primary: neonBlue,
         secondary: deepBlue,
         surface: surface,
-        error: Color(0xFFFF4D6D),
         onPrimary: Colors.black,
       ),
-      textTheme: textTheme.apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
-      ),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? neonBlue
-              : Colors.white70,
-        ),
-        trackColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? neonBlue.withValues(alpha: 0.32)
-              : Colors.white.withValues(alpha: 0.12),
-        ),
-      ),
+      textTheme: textTheme.apply(bodyColor: Colors.white, displayColor: Colors.white),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.07),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        fillColor: Colors.white.withValues(alpha: 0.08),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide(color: neonBlue.withValues(alpha: 0.28)),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: neonBlue.withValues(alpha: 0.35)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
-          borderSide: BorderSide(color: neonBlue.withValues(alpha: 0.2)),
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide(color: neonBlue.withValues(alpha: 0.25)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: neonBlue, width: 1.6),
         ),
       ),

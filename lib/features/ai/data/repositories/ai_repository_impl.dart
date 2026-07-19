@@ -8,7 +8,4 @@ class AiRepositoryImpl implements AiRepository {
 
   @override
   Future<String> sendMessage(String message) => _aiService.sendMessage(message);
-
-  @override
-  Stream<String> streamMessage(String message) => _aiService.streamMessage(message);
 }
