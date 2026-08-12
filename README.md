@@ -52,3 +52,19 @@ The mobile app is prepared as a client for a larger JARVIS ecosystem. For Raspbe
 ## Gemini AI support
 
 Chat uses a Clean Architecture AI abstraction under `lib/features/ai`. The app reads the Gemini API key from secure storage, sends prompts with the `google_generative_ai` package, maps invalid-key/network/timeout/unknown failures to user-facing errors, and persists conversation history in the Hive `conversations` box.
+
+## Voice engine
+
+The voice layer lives under `lib/features/voice` and follows the app architecture: `VoiceController → ChatController → AI Repository → Gemini → TTS`. It requests microphone permission, listens with speech-to-text, waits briefly after silence, sends the transcript into chat, speaks the AI response, and can automatically return to listening mode. Voice settings include language, speech rate, pitch, and auto-listen.
+
+## Raspberry Pi 4 JARVIS Companion
+
+A production Raspberry Pi 4 companion plan is available in [`docs/raspberry-pi-jarvis-assistant.md`](docs/raspberry-pi-jarvis-assistant.md). It covers wake-word activation with `Jarvis`, speech-to-text, text-to-speech, Home Assistant light control, music playback, local app/script launching, security rules, and phased implementation.
+
+## Memory engine
+
+Sprint 5 adds a structured long-term memory system under `lib/features/memory`. Memories are stored in a dedicated Hive box, managed through Riverpod, searchable locally, protected against duplicate entries and sensitive credential storage, and integrated with chat through explicit memory commands plus compact relevant memory context for Gemini prompts.
+
+## Vision engine
+
+Sprint 6 adds a camera/gallery Vision Engine under `lib/features/vision`. Images are selected only after explicit user action, validated locally as JPEG/PNG/WebP, and analyzed through the existing AI repository/Gemini configuration without a second API key system.

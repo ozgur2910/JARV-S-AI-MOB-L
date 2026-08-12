@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-enum AssistantStatus { ready, listening, thinking, speaking }
+enum AssistantStatus { ready, listening, thinking, speaking, error }
 
 extension AssistantStatusLabel on AssistantStatus {
   String get label => switch (this) {
@@ -8,7 +8,10 @@ extension AssistantStatusLabel on AssistantStatus {
         AssistantStatus.listening => 'Listening',
         AssistantStatus.thinking => 'Thinking',
         AssistantStatus.speaking => 'Speaking',
+        AssistantStatus.error => 'Error',
       };
 }
 
-final assistantStatusProvider = StateProvider<AssistantStatus>((ref) => AssistantStatus.ready);
+final assistantStatusProvider = StateProvider<AssistantStatus>((ref) {
+  return AssistantStatus.ready;
+});
