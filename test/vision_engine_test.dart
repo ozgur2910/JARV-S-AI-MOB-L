@@ -67,8 +67,8 @@ void main() {
 
     await controller.analyzeSelectedImage('What is this?');
 
-    expect(controller.debugState.mode, VisionMode.error);
-    expect(controller.debugState.errorMessage, contains('Select an image'));
+    expect(controller.state.mode, VisionMode.error);
+    expect(controller.state.errorMessage, contains('Select an image'));
   });
 }
 

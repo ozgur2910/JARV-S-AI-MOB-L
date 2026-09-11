@@ -35,7 +35,9 @@ class _JarvisBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(painter: _JarvisBackgroundPainter());
+    return CustomPaint(
+      painter: _JarvisBackgroundPainter(),
+    );
   }
 }
 

@@ -153,7 +153,7 @@ class _MemoryScreenState extends ConsumerState<MemoryScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<MemoryType>(
-                  value: type,
+                  initialValue: type,
                   items: MemoryType.values
                       .map((type) => DropdownMenuItem(value: type, child: Text(type.label)))
                       .toList(growable: false),
