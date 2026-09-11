@@ -63,10 +63,12 @@ class _JarvisBackgroundPainter extends CustomPainter {
           AppTheme.neonBlue.withValues(alpha: 0.17),
           Colors.transparent,
         ],
-      ).createShader(Rect.fromCircle(
-        center: Offset(size.width * 0.5, size.height * 0.18),
-        radius: size.width * 0.78,
-      ));
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(size.width * 0.5, size.height * 0.18),
+          radius: size.width * 0.78,
+        ),
+      );
     canvas.drawRect(Offset.zero & size, glowPaint);
   }
 
