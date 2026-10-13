@@ -23,7 +23,7 @@ abstract class AIService {
 class GeminiService implements AIService {
   GeminiService(this._secureStorageService);
 
-  static const _modelName = 'gemini-1.5-flash';
+  static const _modelName = 'gemini-3.8-flash';
   static const _timeout = Duration(seconds: 30);
 
   final SecureStorageService _secureStorageService;
